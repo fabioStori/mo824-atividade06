@@ -5,6 +5,7 @@ import java.util.Random;
 
 import problems.Evaluator;
 import solutions.Solution;
+import java.time.Instant;
 
 /**
  * Abstract class for metaheuristic GA (Genetic Algorithms). It consider the
@@ -76,6 +77,11 @@ public abstract class AbstractGA<G extends Number, F> {
 	 * the best chromosome, according to its fitness evaluation
 	 */
 	protected Chromosome bestChromosome;
+	
+	/**
+	 * the max time to run the solver in seconds
+	 */
+	protected int maxTimeInSeconds;
 
 	/**
 	 * Creates a new solution which is empty, i.e., does not contain any
@@ -138,12 +144,13 @@ public abstract class AbstractGA<G extends Number, F> {
 	 * @param mutationRate
 	 *            The mutation rate.
 	 */
-	public AbstractGA(Evaluator<F> objFunction, Integer generations, Integer popSize, Double mutationRate) {
+	public AbstractGA(Evaluator<F> objFunction, Integer generations, Integer popSize, Double mutationRate, Integer maxTimeInSeconds) {
 		this.ObjFunction = objFunction;
 		this.generations = generations;
 		this.popSize = popSize;
 		this.chromosomeSize = this.ObjFunction.getDomainSize();
 		this.mutationRate = mutationRate;
+		this.maxTimeInSeconds = maxTimeInSeconds;
 	}
 
 	/**
@@ -162,6 +169,7 @@ public abstract class AbstractGA<G extends Number, F> {
 		bestChromosome = getBestChromosome(population);
 		bestSol = decode(bestChromosome);
 		System.out.println("(Gen. " + 0 + ") BestSol = " + bestSol);
+		Instant started = Instant.now();
 
 		/*
 		 * enters the main loop and repeats until a given number of generations
@@ -185,7 +193,10 @@ public abstract class AbstractGA<G extends Number, F> {
 				if (verbose)
 					System.out.println("(Gen. " + g + ") BestSol = " + bestSol);
 			}
-
+			if (Instant.now().getEpochSecond() > started.plusSeconds(maxTimeInSeconds).getEpochSecond()) {
+				System.out.println("Interrupting");
+				break;
+			}
 		}
 
 		return bestSol;

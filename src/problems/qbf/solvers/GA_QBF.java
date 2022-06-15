@@ -3,7 +3,9 @@ package problems.qbf.solvers;
 import java.io.IOException;
 import metaheuristics.ga.AbstractGA;
 import problems.qbf.QBF;
+import problems.qbf.QBF_Inverse;
 import solutions.Solution;
+import java.util.List;
 
 /**
  * Metaheuristic GA (Genetic Algorithm) for
@@ -13,6 +15,13 @@ import solutions.Solution;
  * @author ccavellucci, fusberti
  */
 public class GA_QBF extends AbstractGA<Integer, Integer> {
+	
+	/**
+	 * KQBFInverse obj function
+	 */
+	public QBF_Inverse QBFInverse;
+
+	public List<Integer> allCandidateList;
 
 	/**
 	 * Constructor for the GA_QBF class. The QBF objective function is passed as
@@ -30,8 +39,10 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
 	 * @throws IOException
 	 *             Necessary for I/O operations.
 	 */
-	public GA_QBF(Integer generations, Integer popSize, Double mutationRate, String filename) throws IOException {
-		super(new QBF(filename), generations, popSize, mutationRate);
+	public GA_QBF(Integer generations, Integer popSize, Double mutationRate, QBF_Inverse QBFInverse) throws IOException {
+		super(QBFInverse, generations, popSize, mutationRate);
+		this.QBFInverse = QBFInverse;
+		// this.allCandidateList = makeCL();
 	}
 
 	/**
@@ -60,7 +71,7 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
 		Solution<Integer> solution = createEmptySol();
 		for (int locus = 0; locus < chromosome.size(); locus++) {
 			if (chromosome.get(locus) == 1) {
-				solution.add(new Integer(locus));
+				solution.add(Integer.valueOf(locus));
 			}
 		}
 
@@ -118,7 +129,11 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
 	public static void main(String[] args) throws IOException {
 
 		long startTime = System.currentTimeMillis();
-		GA_QBF ga = new GA_QBF(1000, 100, 1.0 / 100.0, "instances/qbf/qbf100");
+		int generations = 1000;
+		int popSize = 100;
+		double mutationRate = 1.0 / 100.0;
+		QBF_Inverse QBF_Inverse = new QBF_Inverse("instances/kqbf/kqbf100");
+		GA_QBF ga = new GA_QBF(generations, popSize, mutationRate, QBF_Inverse);
 		Solution<Integer> bestSol = ga.solve();
 		System.out.println("maxVal = " + bestSol);
 		long endTime = System.currentTimeMillis();
