@@ -7,7 +7,7 @@ public class Solution<E> extends ArrayList<E> {
 	
 	public Double cost = Double.POSITIVE_INFINITY;
 	public Double usedCapacity = 0.0;
-
+	
 	public Solution() {
 		super();
 	}

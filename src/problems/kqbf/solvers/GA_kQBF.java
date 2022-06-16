@@ -1,11 +1,9 @@
-package problems.qbf.solvers;
+package problems.kqbf.solvers;
 
 import java.io.IOException;
 import metaheuristics.ga.AbstractGA;
-import problems.qbf.QBF;
-import problems.qbf.QBF_Inverse;
+import problems.kqbf.kQBF;
 import solutions.Solution;
-import java.util.List;
 
 /**
  * Metaheuristic GA (Genetic Algorithm) for
@@ -14,14 +12,9 @@ import java.util.List;
  * 
  * @author ccavellucci, fusberti
  */
-public class GA_QBF extends AbstractGA<Integer, Integer> {
-	
-	/**
-	 * KQBFInverse obj function
-	 */
-	public QBF_Inverse QBFInverse;
+public class GA_kQBF extends AbstractGA<Integer, Integer> {
 
-	public List<Integer> allCandidateList;
+	// public kQBF kQBF;
 
 	/**
 	 * Constructor for the GA_QBF class. The QBF objective function is passed as
@@ -39,10 +32,8 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
 	 * @throws IOException
 	 *             Necessary for I/O operations.
 	 */
-	public GA_QBF(Integer generations, Integer popSize, Double mutationRate, QBF_Inverse QBFInverse) throws IOException {
-		super(QBFInverse, generations, popSize, mutationRate);
-		this.QBFInverse = QBFInverse;
-		// this.allCandidateList = makeCL();
+	public GA_kQBF(Integer generations, Integer popSize, Double mutationRate, String filename) throws IOException {
+		super(new kQBF(filename), generations, popSize, mutationRate);			
 	}
 
 	/**
@@ -54,8 +45,9 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
 	 */
 	@Override
 	public Solution<Integer> createEmptySol() {
-		Solution<Integer> sol = new Solution<Integer>();
+		Solution<Integer> sol = new Solution<Integer>();		
 		sol.cost = 0.0;
+		sol.usedCapacity = 0.0;
 		return sol;
 	}
 
@@ -66,9 +58,10 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
 	 * Chromosome)
 	 */
 	@Override
-	protected Solution<Integer> decode(Chromosome chromosome) {
+	protected Solution<Integer> decode(Chromosome chromosome) {	
+		
+		Solution<Integer> solution = createEmptySol();		
 
-		Solution<Integer> solution = createEmptySol();
 		for (int locus = 0; locus < chromosome.size(); locus++) {
 			if (chromosome.get(locus) == 1) {
 				solution.add(Integer.valueOf(locus));
@@ -95,6 +88,32 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
 		return chromosome;
 	}
 
+	@Override
+	/**
+	 * Given a population of chromosome, takes the best chromosome according to
+	 * the fitness evaluation.
+	 * 
+	 * @param population
+	 *            A population of chromosomes.
+	 * @return The best chromosome among the population.
+	 */
+	protected Chromosome getBestChromosome(Population population) {	
+
+		double bestFitness = Double.NEGATIVE_INFINITY;
+		Chromosome bestChromosome = null;
+		for (Chromosome c : population) {			
+			Solution<Integer> fitness = fitness(c);
+			double usedCapacity = fitness.usedCapacity;
+
+			if (fitness.cost > bestFitness && usedCapacity < ObjFunction.getCapacity()) {
+				bestFitness = fitness.cost;
+				bestChromosome = c;
+			}
+		}
+
+		return bestChromosome;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -102,10 +121,8 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
 	 * Chromosome)
 	 */
 	@Override
-	protected Double fitness(Chromosome chromosome) {
-
-		return decode(chromosome).cost;
-
+	protected Solution<Integer> fitness(Chromosome chromosome) {	
+		return decode(chromosome);		
 	}
 
 	/*
@@ -117,9 +134,7 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
 	 */
 	@Override
 	protected void mutateGene(Chromosome chromosome, Integer locus) {
-
 		chromosome.set(locus, 1 - chromosome.get(locus));
-
 	}
 
 	/**
@@ -128,18 +143,17 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
 	 */
 	public static void main(String[] args) throws IOException {
 
+		Integer generations = 1000;
+		Integer popSize = 100;
+		Double mutationRate = 1.0 / 100.0;
+		String filename = "instances/kqbf/kqbf020";
+
 		long startTime = System.currentTimeMillis();
-		int generations = 1000;
-		int popSize = 100;
-		double mutationRate = 1.0 / 100.0;
-		QBF_Inverse QBF_Inverse = new QBF_Inverse("instances/kqbf/kqbf100");
-		GA_QBF ga = new GA_QBF(generations, popSize, mutationRate, QBF_Inverse);
+		GA_kQBF ga = new GA_kQBF(generations, popSize, mutationRate, filename);
 		Solution<Integer> bestSol = ga.solve();
 		System.out.println("maxVal = " + bestSol);
 		long endTime = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
 		System.out.println("Time = " + (double) totalTime / (double) 1000 + " seg");
-
 	}
-
 }
