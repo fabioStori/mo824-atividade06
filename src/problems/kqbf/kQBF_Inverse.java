@@ -1,4 +1,6 @@
-package problems.qbf;
+package problems.kqbf;
+
+import solutions.Solution;
 
 import java.io.IOException;
 
@@ -9,7 +11,7 @@ import java.io.IOException;
  * 
  * @author ccavellucci, fusberti
  */
-public class QBF_Inverse extends QBF {
+public class kQBF_Inverse extends kQBF {
 
 	/**
 	 * Constructor for the QBF_Inverse class.
@@ -20,7 +22,7 @@ public class QBF_Inverse extends QBF {
 	 * @throws IOException
 	 *             Necessary for I/O operations.
 	 */
-	public QBF_Inverse(String filename) throws IOException {
+	public kQBF_Inverse(String filename) throws IOException {
 		super(filename);
 	}
 
@@ -29,32 +31,32 @@ public class QBF_Inverse extends QBF {
 	 * @see problems.qbf.QBF#evaluate()
 	 */
 	@Override
-	public Double evaluateQBF() {
-		return -super.evaluateQBF();
+	public Double evaluatekQBF(Solution<Integer> sol) {
+		return -super.evaluatekQBF(sol);
 	}
 	
 	/* (non-Javadoc)
 	 * @see problems.qbf.QBF#evaluateInsertion(int)
 	 */
 	@Override
-	public Double evaluateInsertionQBF(int i) {	
-		return -super.evaluateInsertionQBF(i);
+	public Double evaluateInsertionkQBF(int i) {	
+		return -super.evaluateInsertionkQBF(i);
 	}
 	
 	/* (non-Javadoc)
 	 * @see problems.qbf.QBF#evaluateRemoval(int)
 	 */
 	@Override
-	public Double evaluateRemovalQBF(int i) {
-		return -super.evaluateRemovalQBF(i);
+	public Double evaluateRemovalkQBF(int i) {
+		return -super.evaluateRemovalkQBF(i);
 	}
 	
 	/* (non-Javadoc)
 	 * @see problems.qbf.QBF#evaluateExchange(int, int)
 	 */
 	@Override
-	public Double evaluateExchangeQBF(int in, int out) {
-		return -super.evaluateExchangeQBF(in,out);
+	public Double evaluateExchangekQBF(int in, int out) {
+		return -super.evaluateExchangekQBF(in,out);
 	}
 
 }

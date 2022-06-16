@@ -21,6 +21,14 @@ public interface Evaluator<E> {
 	 */
 	public abstract Integer getDomainSize();
 
+		/**
+	 * Gives the size of the problem domain. Typically this is the number of
+	 * decision variables of an optimization problem.
+	 * 
+	 * @return the size of the problem domain.
+	 */
+	public abstract Double getCapacity();
+
 	/**
 	 * The evaluating function is responsible for returning the mapping value of
 	 * a solution.
