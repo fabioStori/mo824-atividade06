@@ -166,7 +166,6 @@ public abstract class AbstractGA<G extends Number, F> {
 
 		bestChromosome = getBestChromosome(population);
 		bestSol = decode(bestChromosome);
-		System.out.println("(Gen. " + 0 + ") BestSol = " + bestSol);
 
 		/*
 		 * enters the main loop and repeats until a given number of generations
@@ -187,7 +186,7 @@ public abstract class AbstractGA<G extends Number, F> {
 
 			bestSolution = fitness(bestChromosome);
 
-			if (bestSolution.cost > bestSol.cost && bestSolution.usedCapacity < ObjFunction.getCapacity()) {
+			if (bestSolution.cost > bestSol.cost) {
 				bestSol = decode(bestChromosome);
 				if (verbose)
 					System.out.println("(Gen. " + g + ") BestSol = " + bestSol);
@@ -209,7 +208,7 @@ public abstract class AbstractGA<G extends Number, F> {
 
 		while (population.size() < popSize) {
 			Chromosome randChromo = generateRandomChromosome();
-			if( fitness(randChromo).usedCapacity < ObjFunction.getCapacity()) {
+			if (fitness(randChromo).usedCapacity < ObjFunction.getCapacity()) {
 				population.add(randChromo);
 			}			
 		}
@@ -380,7 +379,6 @@ public abstract class AbstractGA<G extends Number, F> {
 	 */
 	protected Population selectPopulation(Population offsprings, Population prevPopulation) {
 	
-
 		for (Chromosome c : offsprings) {
 			if (fitness(c).usedCapacity < ObjFunction.getCapacity()) {
 				prevPopulation.remove(getWorseChromosome(prevPopulation));
