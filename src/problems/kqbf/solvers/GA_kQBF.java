@@ -191,31 +191,22 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 	 */
 	public static void main(String[] args) throws IOException {
 
-		verbose = false;
+		verbose = true;
 
-		Integer generations = 1000;
-		Integer popSize = 10;
+		Integer generations = 5000;
+		Integer popSize = 100;
 		Double mutationRate = 1.0 / 100.0;
-		String filename = "instances/kqbf/kqbf100";
+		String filename = "instances/kqbf/kqbf020";
 		Boolean useUniformCrossover = false;
-		Integer maxTimeInSeconds = 4; // 30 minutes
+		Integer maxTimeInSeconds = 30 * 60; // 30 minutes
 		Boolean adaptiveMutation = false;
 
 		long startTime = System.currentTimeMillis();
-		GA_kQBF ga = new GA_kQBF(generations, popSize, mutationRate, filename, useUniformCrossover, maxTimeInSeconds, false);
+		GA_kQBF ga = new GA_kQBF(generations, popSize, mutationRate, filename, useUniformCrossover, maxTimeInSeconds, adaptiveMutation);
 		Solution<Integer> bestSol = ga.solve();
 		System.out.println("maxVal = " + bestSol);
 		long endTime = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
-		System.out.println("Time = " + (double) totalTime / (double) 1000 + " seg");
-
-
-		startTime = System.currentTimeMillis();
-		GA_kQBF ga2 = new GA_kQBF(generations, popSize, 0., filename, useUniformCrossover, maxTimeInSeconds, true);
-		bestSol = ga2.solve();
-		System.out.println("maxVal = " + bestSol);
-		endTime = System.currentTimeMillis();
-		totalTime = endTime - startTime;
 		System.out.println("Time = " + (double) totalTime / (double) 1000 + " seg");
 	}
 }
