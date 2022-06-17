@@ -1,23 +1,22 @@
 package problems.kqbf.solvers;
 
 import java.io.IOException;
+import java.util.ArrayList;
+
 import metaheuristics.ga.AbstractGA;
 import problems.kqbf.kQBF;
 import solutions.Solution;
 
-/**
- * Metaheuristic GA (Genetic Algorithm) for
- * obtaining an optimal solution to a QBF (Quadractive Binary Function --
- * {@link #QuadracticBinaryFunction}). 
- * 
- * @author ccavellucci, fusberti
- */
+import static java.lang.Math.abs;
+import static java.lang.Math.max;
+
 public class GA_kQBF extends AbstractGA<Integer, Integer> {
 
 	// public kQBF kQBF;
+	private Boolean adaptiveMutation = false;
 
 	/**
-	 * Constructor for the GA_QBF class. The QBF objective function is passed as
+	 * Constructor for the GA_kQBF class. The QBF objective function is passed as
 	 * argument for the superclass constructor.
 	 * 
 	 * @param generations
@@ -32,8 +31,9 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 	 * @throws IOException
 	 *             Necessary for I/O operations.
 	 */
-	public GA_kQBF(Integer generations, Integer popSize, Double mutationRate, String filename) throws IOException {
-		super(new kQBF(filename), generations, popSize, mutationRate);			
+	public GA_kQBF(Integer generations, Integer popSize, Double mutationRate, String filename, Boolean adaptiveMutation) throws IOException {
+		super(new kQBF(filename), generations, popSize, mutationRate);
+		this.adaptiveMutation = adaptiveMutation;
 	}
 
 	/**
@@ -137,6 +137,45 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 		chromosome.set(locus, 1 - chromosome.get(locus));
 	}
 
+
+	@Override
+	protected Population mutate(Population offsprings) {
+		if(!adaptiveMutation){
+			return super.mutate(offsprings);
+		}
+
+		// here the magic happens
+
+		Double sumCost = 0.;
+		ArrayList<Double> costs = new ArrayList<>();
+		for(Chromosome c : offsprings) {
+			Double cost = decode(c).cost;
+			sumCost += cost;
+			costs.add(cost);
+		}
+		Double avg_cost = sumCost / (double) popSize;
+		int idx = 0;
+		for (Chromosome c : offsprings) {
+			mutationRate = 1. / c.size();
+			Double mutationRateOfThisChromosome = 0.0;
+			if(avg_cost < costs.get(idx)){
+				Integer ik = 0;
+				for(; c.size() < popSize && c.get(ik) == 0; ik++) {}
+				Double cost = costs.get(idx);
+				mutationRateOfThisChromosome = max(mutationRate,(mutationRate/(ik+1)) * (avg_cost / cost));
+			} else {
+				mutationRateOfThisChromosome = max(mutationRate,avg_cost / (4. * costs.get(idx)));
+			}
+			for (int locus = 0; locus < chromosomeSize; locus++) {
+				if (rng.nextDouble() < mutationRateOfThisChromosome) {
+					mutateGene(c, locus);
+				}
+			}
+			idx++;
+		}
+		return offsprings;
+	}
+
 	/**
 	 * A main method used for testing the GA metaheuristic.
 	 * 
@@ -144,16 +183,26 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 	public static void main(String[] args) throws IOException {
 
 		Integer generations = 1000;
-		Integer popSize = 100;
-		Double mutationRate = 1.0 / 100.0;
-		String filename = "instances/kqbf/kqbf020";
+		Integer popSize = 20;
+		String filename = "instances/kqbf/kqbf100";
 
 		long startTime = System.currentTimeMillis();
-		GA_kQBF ga = new GA_kQBF(generations, popSize, mutationRate, filename);
+
+		verbose = false;
+
+		GA_kQBF ga = new GA_kQBF(generations, popSize, 20/1000., filename, false);
 		Solution<Integer> bestSol = ga.solve();
 		System.out.println("maxVal = " + bestSol);
 		long endTime = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
+		System.out.println("Time = " + (double) totalTime / (double) 1000 + " seg");
+
+
+		ga = new GA_kQBF(generations, popSize, 0., filename, true);
+		bestSol = ga.solve();
+		System.out.println("maxVal = " + bestSol);
+		endTime = System.currentTimeMillis();
+		totalTime = endTime - startTime;
 		System.out.println("Time = " + (double) totalTime / (double) 1000 + " seg");
 	}
 }
