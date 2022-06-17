@@ -26,14 +26,17 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 	 *            Size of the population.
 	 * @param mutationRate
 	 *            The mutation rate.
+	 * @param useUniformCrossover
+	 *            If it should use the uniform crossover strategy or not.
 	 * @param filename
 	 *            Name of the file for which the objective function parameters
 	 *            should be read.
 	 * @throws IOException
 	 *             Necessary for I/O operations.
 	 */
-	public GA_kQBF(Integer generations, Integer popSize, Double mutationRate, String filename) throws IOException {
-		super(new kQBF(filename), generations, popSize, mutationRate);			
+	public GA_kQBF(Integer generations, Integer popSize, Double mutationRate, String filename, Boolean useUniformCrossover, Integer maxTimeInSeconds) throws IOException {
+		super(new kQBF(filename), generations, popSize, mutationRate, maxTimeInSeconds);
+		this.useUniformCrossover = useUniformCrossover;
 	}
 
 	/**
@@ -146,10 +149,12 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 		Integer generations = 1000;
 		Integer popSize = 100;
 		Double mutationRate = 1.0 / 100.0;
-		String filename = "instances/kqbf/kqbf020";
+		String filename = "instances/kqbf/kqbf200";
+		Boolean useUniformCrossover = false;
+		Integer maxTimeInSeconds = 30 * 60; // 30 minutes
 
 		long startTime = System.currentTimeMillis();
-		GA_kQBF ga = new GA_kQBF(generations, popSize, mutationRate, filename);
+		GA_kQBF ga = new GA_kQBF(generations, popSize, mutationRate, filename, useUniformCrossover, maxTimeInSeconds);
 		Solution<Integer> bestSol = ga.solve();
 		System.out.println("maxVal = " + bestSol);
 		long endTime = System.currentTimeMillis();
