@@ -142,12 +142,12 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 
 	@Override
 	protected Population mutate(Population offsprings) {
+		// the default behavior
 		if(!adaptiveMutation){
 			return super.mutate(offsprings);
 		}
 
-		// here the magic happens
-
+		// here the magic happens -- adaptive mutation!
 		Double sumCost = 0.;
 		ArrayList<Double> costs = new ArrayList<>();
 		for(Chromosome c : offsprings) {
@@ -158,14 +158,21 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 		Double avg_cost = sumCost / (double) popSize;
 		int idx = 0;
 		for (Chromosome c : offsprings) {
+			// start value of probability of mutation
 			mutationRate = 1. / c.size();
+
+			// initial value from current chromosome
 			Double mutationRateOfThisChromosome = 0.0;
+
 			if(avg_cost < costs.get(idx)){
-				Integer ik = 0;
-				for(; c.size() < popSize && c.get(ik) == 0; ik++) {}
-				Double cost = costs.get(idx);
-				mutationRateOfThisChromosome = max(mutationRate,(mutationRate/(ik+1)) * (avg_cost / cost));
+				// here, the mutation probability should be kept low because the chromosome is a good one and
+				// mutation could disrupt its schema.
+				Double sigma = 1 / 2. * mutationRate;
+				mutationRateOfThisChromosome = max(mutationRate,(avg_cost / costs.get(idx)) * sigma);
 			} else {
+				// there is no reason to avoid the mutation of all bits
+				// Thus, the mutation probability desity function will be assumed constant for all bits,
+				// as in conventional GAs.
 				mutationRateOfThisChromosome = max(mutationRate,avg_cost / (4. * costs.get(idx)));
 			}
 			for (int locus = 0; locus < chromosomeSize; locus++) {
@@ -184,20 +191,31 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 	 */
 	public static void main(String[] args) throws IOException {
 
-		Integer generations = 5000;
-		Integer popSize = 100;
+		verbose = false;
+
+		Integer generations = 1000;
+		Integer popSize = 10;
 		Double mutationRate = 1.0 / 100.0;
-		String filename = "instances/kqbf/kqbf200";
+		String filename = "instances/kqbf/kqbf100";
 		Boolean useUniformCrossover = false;
-		Integer maxTimeInSeconds = 30 * 60; // 30 minutes
+		Integer maxTimeInSeconds = 4; // 30 minutes
 		Boolean adaptiveMutation = false;
 
 		long startTime = System.currentTimeMillis();
-		GA_kQBF ga = new GA_kQBF(generations, popSize, mutationRate, filename, useUniformCrossover, maxTimeInSeconds, adaptiveMutation);
+		GA_kQBF ga = new GA_kQBF(generations, popSize, mutationRate, filename, useUniformCrossover, maxTimeInSeconds, false);
 		Solution<Integer> bestSol = ga.solve();
 		System.out.println("maxVal = " + bestSol);
 		long endTime = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
+		System.out.println("Time = " + (double) totalTime / (double) 1000 + " seg");
+
+
+		startTime = System.currentTimeMillis();
+		GA_kQBF ga2 = new GA_kQBF(generations, popSize, 0., filename, useUniformCrossover, maxTimeInSeconds, true);
+		bestSol = ga2.solve();
+		System.out.println("maxVal = " + bestSol);
+		endTime = System.currentTimeMillis();
+		totalTime = endTime - startTime;
 		System.out.println("Time = " + (double) totalTime / (double) 1000 + " seg");
 	}
 }
