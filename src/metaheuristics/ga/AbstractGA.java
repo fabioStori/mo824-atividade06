@@ -197,6 +197,7 @@ public abstract class AbstractGA<G extends Number, F> {
 
 			Instant started = Instant.now();
 
+			// System.out.println("(Gen. " + g + ") BestSol = " + bestSol);
 			if (bestSolution.cost > bestSol.cost) {
 				bestSol = decode(bestChromosome);
 				if (verbose)
@@ -268,7 +269,7 @@ public abstract class AbstractGA<G extends Number, F> {
 	protected Chromosome getBestChromosome(Population population) {
 
 		double bestFitness = Double.NEGATIVE_INFINITY;
-		Chromosome bestChromosome = null;
+		Chromosome bestChromosome = population.get(0);
 		for (Chromosome c : population) {
 			double fitness = fitness(c).cost;
 			if (fitness > bestFitness) {
@@ -429,12 +430,20 @@ public abstract class AbstractGA<G extends Number, F> {
 	 */
 	protected Population selectPopulation(Population offsprings, Population prevPopulation) {
 	
+		Integer count = 0;
+
 		for (Chromosome c : offsprings) {
 			if (fitness(c).usedCapacity < ObjFunction.getCapacity()) {
-				prevPopulation.remove(getWorseChromosome(prevPopulation));
-				prevPopulation.add(c);
-			}	
-		}	
+				prevPopulation.set(count, c);
+				count++;
+			}
+		}
+
+		Chromosome worse = getWorseChromosome(offsprings);
+		if (fitness(worse).cost < fitness(bestChromosome).cost) {
+			prevPopulation.remove(worse);
+			prevPopulation.add(bestChromosome);
+		}
 
 		return prevPopulation;
 	}

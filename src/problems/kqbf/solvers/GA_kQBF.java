@@ -102,8 +102,8 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 	protected Chromosome getBestChromosome(Population population) {	
 
 		double bestFitness = Double.NEGATIVE_INFINITY;
-		Chromosome bestChromosome = null;
-		for (Chromosome c : population) {			
+		Chromosome bestChromosome = population.get(0);
+		for (Chromosome c : population) {
 			Solution<Integer> fitness = fitness(c);
 			double usedCapacity = fitness.usedCapacity;
 
@@ -184,7 +184,7 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 	 */
 	public static void main(String[] args) throws IOException {
 
-		Integer generations = 1000;
+		Integer generations = 5000;
 		Integer popSize = 100;
 		Double mutationRate = 1.0 / 100.0;
 		String filename = "instances/kqbf/kqbf200";
