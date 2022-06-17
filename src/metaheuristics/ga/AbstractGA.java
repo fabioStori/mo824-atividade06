@@ -5,6 +5,7 @@ import java.util.Random;
 
 import problems.Evaluator;
 import solutions.Solution;
+import java.time.Instant;
 
 /**
  * Abstract class for metaheuristic GA (Genetic Algorithms). It consider the
@@ -52,6 +53,8 @@ public abstract class AbstractGA<G extends Number, F> {
 	 */
 	protected int popSize;
 
+	protected Boolean useUniformCrossover;
+
 	/**
 	 * the size of the chromosome
 	 */
@@ -81,6 +84,11 @@ public abstract class AbstractGA<G extends Number, F> {
 	 * the best solution, according to its fitness evaluation
 	 */
 	protected Solution<F> bestSolution;
+	
+	/**
+	 * the max time to run the solver in seconds
+	 */
+	protected int maxTimeInSeconds;
 
 	/**
 	 * Creates a new solution which is empty, i.e., does not contain any
@@ -143,12 +151,13 @@ public abstract class AbstractGA<G extends Number, F> {
 	 * @param mutationRate
 	 *            The mutation rate.
 	 */
-	public AbstractGA(Evaluator<F> objFunction, Integer generations, Integer popSize, Double mutationRate) {
+	public AbstractGA(Evaluator<F> objFunction, Integer generations, Integer popSize, Double mutationRate, Integer maxTimeInSeconds) {
 		this.ObjFunction = objFunction;
 		this.generations = generations;
 		this.popSize = popSize;
 		this.chromosomeSize = this.ObjFunction.getDomainSize();
 		this.mutationRate = mutationRate;
+		this.maxTimeInSeconds = maxTimeInSeconds;
 	}
 
 	/**
@@ -186,15 +195,44 @@ public abstract class AbstractGA<G extends Number, F> {
 
 			bestSolution = fitness(bestChromosome);
 
+			Instant started = Instant.now();
+
 			if (bestSolution.cost > bestSol.cost) {
 				bestSol = decode(bestChromosome);
 				if (verbose)
 					System.out.println("(Gen. " + g + ") BestSol = " + bestSol);
 			}
 
+			if (Instant.now().getEpochSecond() > started.plusSeconds(maxTimeInSeconds).getEpochSecond()) {
+				System.out.println("Time limit reached. Interrupting...");
+				break;
+			}
+
 		}
 
 		return bestSol;
+	}
+
+	/**
+	 * Randomly generates an initial population to start the GA.
+	 * 
+	 * @return A population of chromosomes.
+	 */
+	protected Chromosome makeFeasible(Chromosome randChromo) {
+
+		Integer indexWithValueZero = randChromo.indexOf(0);
+
+		for (int i = 0; i < randChromo.size(); i++) {
+			if (randChromo.get(i).intValue() == 1) {
+				randChromo.set(i, randChromo.get(indexWithValueZero));
+				if (fitness(randChromo).usedCapacity < ObjFunction.getCapacity()) {
+					break;
+				}
+			}
+		}
+
+		return randChromo;
+
 	}
 
 	/**
@@ -210,7 +248,9 @@ public abstract class AbstractGA<G extends Number, F> {
 			Chromosome randChromo = generateRandomChromosome();
 			if (fitness(randChromo).usedCapacity < ObjFunction.getCapacity()) {
 				population.add(randChromo);
-			}			
+			} else {
+				population.add(makeFeasible(randChromo));
+			}
 		}
 
 		return population;
@@ -326,12 +366,22 @@ public abstract class AbstractGA<G extends Number, F> {
 			Chromosome offspring2 = new Chromosome();
 
 			for (int j = 0; j < chromosomeSize; j++) {
-				if (j >= crosspoint1 && j < crosspoint2) {
-					offspring1.add(parent2.get(j));
-					offspring2.add(parent1.get(j));
+				if (this.useUniformCrossover) {
+					if (rng.nextDouble() < 0.5) {
+						offspring1.add(parent2.get(j));
+						offspring2.add(parent1.get(j));
+					} else {
+						offspring1.add(parent1.get(j));
+						offspring2.add(parent2.get(j));
+					}
 				} else {
-					offspring1.add(parent1.get(j));
-					offspring2.add(parent2.get(j));
+					if (j >= crosspoint1 && j < crosspoint2) {
+						offspring1.add(parent2.get(j));
+						offspring2.add(parent1.get(j));
+					} else {
+						offspring1.add(parent1.get(j));
+						offspring2.add(parent2.get(j));
+					}
 				}
 			}
 
