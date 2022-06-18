@@ -181,6 +181,8 @@ public abstract class AbstractGA<G extends Number, F> {
 		 */
 		for (int g = 1; g <= generations; g++) {
 
+			Instant started = Instant.now();
+
 			Population parents = selectParents(population);
 
 			Population offsprings = crossover(parents);
@@ -195,9 +197,6 @@ public abstract class AbstractGA<G extends Number, F> {
 
 			bestSolution = fitness(bestChromosome);
 
-			Instant started = Instant.now();
-
-			// System.out.println("(Gen. " + g + ") BestSol = " + bestSol);
 			if (bestSolution.cost > bestSol.cost) {
 				bestSol = decode(bestChromosome);
 				if (verbose)

@@ -193,7 +193,7 @@ public class GA_kQBF extends AbstractGA<Integer, Integer> {
 
 		verbose = true;
 
-		Integer generations = 5000;
+		Integer generations = 1000;
 		Integer popSize = 100;
 		Double mutationRate = 1.0 / 100.0;
 		String filename = "instances/kqbf/kqbf020";
